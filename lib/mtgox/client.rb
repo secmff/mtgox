@@ -53,7 +53,7 @@ module MtGox
     # @example
     #   MtGox.ticker
     def ticker
-      ticker = get('/api/1/BTCUSD/ticker')
+      ticker = get('/api/1/BTCEUR/ticker')
       Ticker.instance.buy         = value_currency ticker['buy']
       Ticker.instance.high        = value_currency ticker['high']
       Ticker.instance.price       = value_currency ticker['last_all']
@@ -86,7 +86,7 @@ module MtGox
     # @example
     #   MtGox.offers
     def offers
-      offers = get('/api/1/BTCUSD/depth/fetch')
+      offers = get('/api/1/BTCEUR/depth/fetch')
       asks = offers['asks'].sort_by do |ask|
         ask['price_int'].to_i
       end.map! do |ask|
@@ -148,7 +148,7 @@ module MtGox
     #   MtGox.trades
     #   MtGox.trades :since => 12341234
     def trades(opts={})
-      get('/api/1/BTCUSD/trades/fetch', opts).
+      get('/api/1/BTCEUR/trades/fetch', opts).
         sort_by{|trade| trade['date']}.map do |trade|
         Trade.new(trade)
       end
@@ -235,7 +235,7 @@ module MtGox
     # @authenticated true
     # @param type [String] the type of order to create, either "buy" or "sell"
     # @param amount [Numberic] the number of bitcoins to buy/sell
-    # @param price [Numeric or Symbol] the bid/ask price in USD, or :market if placing a market order
+    # @param price [Numeric or Symbol] the bid/ask price in EUR, or :market if placing a market order
     # @return [String] order ID for the order, can be inspected using order_result
     # @example
     #   # Sell one bitcoin for $123
@@ -245,7 +245,7 @@ module MtGox
       if price != :market
           order[:price_int] = intify(price, :usd)
       end
-      post('/api/1/BTCUSD/order/add', order)
+      post('/api/1/BTCEUR/order/add', order)
     end
     alias add_order! order!
     alias addorder! order!
@@ -275,7 +275,7 @@ module MtGox
       orders = post('/api/1/generic/orders')
       order = orders.find{|order| order['oid'] == args.to_s}
       if order
-        res = post('/api/1/BTCUSD/order/cancel', oid: order['oid'])
+        res = post('/api/1/BTCEUR/order/cancel', oid: order['oid'])
         orders.delete_if{|o| o['oid'] == res['oid']}
         parse_orders(orders)
       else
@@ -306,7 +306,7 @@ module MtGox
     # Fetch wallet history
     #
     # @authenticated true
-    # @param currency [String] 'USD', 'BTC'
+    # @param currency [String] 'EUR', 'BTC'
     # @param params [Hash] optional hash with  type, date_start, date_end,
     # trade_id, page
     # @see https://en.bitcoin.it/wiki/MtGox/API/HTTP/v1#Your_wallet_history
